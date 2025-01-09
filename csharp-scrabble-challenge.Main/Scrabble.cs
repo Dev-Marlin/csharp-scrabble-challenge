@@ -10,7 +10,6 @@ namespace csharp_scrabble_challenge.Main
 {
     public class Scrabble
     {
-        //private Dictionary<char[], int> LetterScores = new Dictionary<char[], int>();
         Dictionary<char, int> LetterScores = new Dictionary<char, int>();
 
         private string word;
@@ -20,74 +19,71 @@ namespace csharp_scrabble_challenge.Main
             this.word = word.ToUpper();
 
             GiveScoreToChar(LetterScores);
-            /*
-            LetterScores.Add(['A', 'E', 'I', 'O', 'U', 'L', 'N', 'R', 'S', 'T'], 1);
-            LetterScores.Add(['D', 'G'], 2);
-            LetterScores.Add(['B', 'C', 'M', 'P'], 3);
-            LetterScores.Add(['F', 'H', 'V', 'W', 'Y'], 4);
-            LetterScores.Add(['K'], 5);
-            LetterScores.Add(['J', 'X'], 8);
-            LetterScores.Add(['Q', 'Z'], 10);
-            */
         }
 
         public int score()
         {
             int Score = 0;
             int LetterModifier = 1;
-            int WordModifier = WordModifierValue(word);
-            int CurlyBracketCounter = 0;
-            int BracketCounter = 0;
-
-            /*
-            Regex LetterDoublePattern = new Regex("[{][A-Z]{1}[}]");
-            Regex LetterTripplePattern = new Regex("[[][A-Z]{1}[]]");
-            Regex WordDoublePattern = new Regex("[{][A-Z][}]");
-            Regex WordTripplePattern = new Regex("[[][A-Z][]]");
-
-            if(WordDoublePattern.IsMatch(word))
-            {
-                WordModifier = 2;
-            }
-            else if (WordTripplePattern.IsMatch(word))
-            {
-                WordModifier = 3;
-            }*/
-
+            int WordModifier = 1;
+            List<char> Brackets = new List<char>();
 
             foreach (char c in word)
             {
-                if(c == '[' || c == ']' || c == '{' || c == '}')
+                if(c == '[' || c == '{' )
                 {
+                    Brackets.Add(c);
+
+                    if (c == '[')
+                        LetterModifier = 3;
+
+                    if (c == '{')
+                        LetterModifier = 2;
+
                     continue;
+                }
+
+                if (c == ']')
+                {
+                    if (Brackets[Brackets.Count - 1] == '[')
+                    {
+                        LetterModifier = 1;
+                    }
+                    else
+                    {
+                        Score = 0;
+                        break;
+                    }
+
+                continue;
+                }
+                else if (c == '}')
+                {
+                    if (Brackets[Brackets.Count - 1] == '{')
+                    {
+                        LetterModifier = 1;
+                    }
+                    else
+                    {
+                        Score = 0;
+                        break;
+                    }
+
+                continue;
                 }
 
                 if (LetterScores.ContainsKey(c))
                 {
                     Score += LetterModifier * LetterScores[c];
                 }
+                else
+                {
+                    Score = 0;
+                    break;
+                }
             }
-
             return WordModifier * Score;
         }
-
-        private int WordModifierValue(string word)
-        {
-            if (word.Length < 3)
-                return 1;
-
-            char start = word[0];
-            char end = word[word.Length - 1];
-
-            if (start == '[' && end == ']')
-                return 3;
-
-            if (start == '{' && end == '}')
-                return 2;
-
-            return 1;
-        }
-
         private void GiveScoreToChar(Dictionary<char, int> LetterScores)
         {
             //1 point chars
